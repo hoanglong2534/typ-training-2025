@@ -21,5 +21,6 @@
         <module>test-case</module>
         <module>code-runner</module>
         <module>result-processor</module>
+        <module>class-management</module>
     </modules>
 </project>
