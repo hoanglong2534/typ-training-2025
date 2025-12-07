@@ -18,7 +18,6 @@
     <modules>
         <module>core</module>
         <module>libs</module>
-        <module>infrastructure</module>
         <module>components</module>
     </modules>
 

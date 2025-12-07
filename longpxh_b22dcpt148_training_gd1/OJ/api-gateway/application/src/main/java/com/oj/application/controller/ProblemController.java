@@ -6,6 +6,9 @@ import com.oj.application.dto.response.ProblemResponse;
 import com.oj.application.security.RequestAuthContext;
 import com.oj.platform.components.problem.domain.model.Problem;
 import com.oj.platform.components.problem.domain.service.ProblemService;
+import com.oj.application.dto.response.TestCaseResponse;
+import com.oj.platform.components.testcase.domain.model.TestCase;
+import com.oj.platform.components.testcase.domain.service.TestCaseService;
 import com.oj.platform.core.domain.pagination.PageResult;
 import com.oj.platform.core.http.ApiResponse;
 import jakarta.validation.Valid;
@@ -24,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProblemController {
     private final ProblemService problemService;
+    private final TestCaseService testCaseService;
     private final RequestAuthContext authContext;
 
     @PostMapping
@@ -36,8 +40,8 @@ public class ProblemController {
 
         Problem problem = Problem.builder()
                 .title(request.getTitle())
-                .description(request.getDescription())
-                .difficulty(request.getDifficulty())
+                .content(request.getContent())
+                .level(request.getLevel())
                 .timeLimit(request.getTimeLimit())
                 .memoryLimit(request.getMemoryLimit())
                 .createdBy(userId)
@@ -81,7 +85,7 @@ public class ProblemController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProblemResponse> getById(@PathVariable Long id) {
+    public ApiResponse<ProblemResponse> getById(@PathVariable("id") Long id) {
         Problem problem = problemService.findById(id);
         
         // Check if user has access to this problem (belongs to one of user's classes)
@@ -94,6 +98,15 @@ public class ProblemController {
         return ApiResponse.success(response, "Problem retrieved successfully");
     }
 
+    @GetMapping("/{id}/testcases")
+    public ApiResponse<List<TestCaseResponse>> getTestCases(@PathVariable("id") Long id) {
+        List<TestCase> testCases = testCaseService.findByProblemId(id);
+        List<TestCaseResponse> responses = testCases.stream()
+                .map(this::toTestCaseResponse)
+                .toList();
+        return ApiResponse.success(responses, "Test cases retrieved successfully");
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ProblemResponse> update(
@@ -103,8 +116,8 @@ public class ProblemController {
         Problem existing = problemService.findById(id);
 
         if (request.getTitle() != null) existing.setTitle(request.getTitle());
-        if (request.getDescription() != null) existing.setDescription(request.getDescription());
-        if (request.getDifficulty() != null) existing.setDifficulty(request.getDifficulty());
+        if (request.getContent() != null) existing.setContent(request.getContent());
+        if (request.getLevel() != null) existing.setLevel(request.getLevel());
         if (request.getTimeLimit() != null) existing.setTimeLimit(request.getTimeLimit());
         if (request.getMemoryLimit() != null) existing.setMemoryLimit(request.getMemoryLimit());
 
@@ -124,14 +137,27 @@ public class ProblemController {
     private ProblemResponse toResponse(Problem problem) {
         return ProblemResponse.builder()
                 .id(problem.getId())
+                .problemCode(problem.getProblemCode())
                 .title(problem.getTitle())
-                .description(problem.getDescription())
-                .difficulty(problem.getDifficulty())
+                .content(problem.getContent())
+                .level(problem.getLevel())
                 .timeLimit(problem.getTimeLimit())
                 .memoryLimit(problem.getMemoryLimit())
                 .createdBy(problem.getCreatedBy())
                 .createdAt(problem.getCreatedAt())
                 .updatedAt(problem.getUpdatedAt())
+                .build();
+    }
+
+    private TestCaseResponse toTestCaseResponse(TestCase testCase) {
+        return TestCaseResponse.builder()
+                .id(testCase.getId())
+                .problemId(testCase.getProblemId())
+                .input(testCase.getInput())
+                .expectedOutput(testCase.getExpectedOutput())
+                .isSample(testCase.getIsSample())
+                .points(testCase.getPoints())
+                .createdAt(testCase.getCreatedAt())
                 .build();
     }
 }

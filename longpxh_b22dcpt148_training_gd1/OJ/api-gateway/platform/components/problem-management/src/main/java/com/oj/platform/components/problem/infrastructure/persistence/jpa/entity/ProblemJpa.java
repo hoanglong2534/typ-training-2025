@@ -1,5 +1,6 @@
 package com.oj.platform.components.problem.infrastructure.persistence.jpa.entity;
 
+import com.oj.platform.components.problem.infrastructure.persistence.jpa.value_object.ProblemLevelEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,14 +20,17 @@ public class ProblemJpa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "problem_code", nullable = false,  unique = true)
+    private String problemCode;
+
     @Column(nullable = false, length = 200)
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String description;
+    private String content;
 
     @Column(nullable = false, length = 20)
-    private String difficulty;
+    private ProblemLevelEnum level;
 
     @Column(name = "time_limit", nullable = false)
     private Integer timeLimit;

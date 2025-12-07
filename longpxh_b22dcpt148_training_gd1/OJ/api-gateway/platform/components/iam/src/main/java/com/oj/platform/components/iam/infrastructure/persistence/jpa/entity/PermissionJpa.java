@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "permissions")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PermissionJpa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +28,7 @@ public class PermissionJpa {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY)
     private List<RolePermissionJpa> rolePermissions;
 

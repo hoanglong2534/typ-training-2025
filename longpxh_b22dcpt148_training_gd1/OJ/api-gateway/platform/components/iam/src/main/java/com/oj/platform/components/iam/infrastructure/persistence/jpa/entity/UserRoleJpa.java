@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "users_roles")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserRoleJpa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +19,7 @@ public class UserRoleJpa {
     @Column(name = "role_id", nullable = false)
     private Long roleId;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserJpa user;

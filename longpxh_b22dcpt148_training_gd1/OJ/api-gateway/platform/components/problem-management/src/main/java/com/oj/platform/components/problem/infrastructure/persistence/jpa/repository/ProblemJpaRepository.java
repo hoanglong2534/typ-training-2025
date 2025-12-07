@@ -10,12 +10,12 @@ import java.util.List;
 
 @Repository
 public interface ProblemJpaRepository extends JpaRepository<ProblemJpa, Long> {
-    Page<ProblemJpa> findByDifficulty(String difficulty, Pageable pageable);
+    Page<ProblemJpa> findByLevel(String level, Pageable pageable);
     Page<ProblemJpa> findByCreatedBy(Long createdBy, Pageable pageable);
     Page<ProblemJpa> findByTitleContainingIgnoreCase(String title, Pageable pageable);
     Page<ProblemJpa> findByClassId(Long classId, Pageable pageable);
     Page<ProblemJpa> findByClassIdIn(List<Long> classIds, Pageable pageable);
-    Page<ProblemJpa> findByDifficultyAndClassIdIn(String difficulty, List<Long> classIds, Pageable pageable);
+    Page<ProblemJpa> findByLevelAndClassIdIn(String level, List<Long> classIds, Pageable pageable);
     Page<ProblemJpa> findByTitleContainingIgnoreCaseAndClassIdIn(String title, List<Long> classIds, Pageable pageable);
 }
 

@@ -38,7 +38,15 @@ public class AuthService {
         claims.put("user_id", userId != null ? userId : user.getId());
         claims.put("class_ids", classIds != null ? classIds : List.of());
 
-        return createTokenPair(username, claims);
+        AuthResponse response = createTokenPair(username, claims);
+
+        // Fill user info
+        response.setUserId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setFullName(user.getFullName());
+        response.setRoles(List.of("ROLE_USER", "ROLE_ADMIN")); 
+        
+        return response;
     }
 
     public AuthResponse refreshToken(String refreshToken) {

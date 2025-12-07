@@ -39,7 +39,7 @@ public class TestCaseController {
 
     @GetMapping("/problem/{problemId}")
     public ApiResponse<List<TestCaseResponse>> getByProblemId(
-            @PathVariable Long problemId,
+            @PathVariable("problemId") Long problemId,
             @RequestParam(name = "samplesOnly", required = false) Boolean samplesOnly) {
 
         List<TestCase> testCases;
@@ -58,7 +58,7 @@ public class TestCaseController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<TestCaseResponse> getById(@PathVariable Long id) {
+    public ApiResponse<TestCaseResponse> getById(@PathVariable("id") Long id) {
         TestCase testCase = testCaseService.findById(id);
         TestCaseResponse response = toResponse(testCase);
         return ApiResponse.success(response, "Test case retrieved successfully");
@@ -67,7 +67,7 @@ public class TestCaseController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<TestCaseResponse> update(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody CreateTestCaseRequest request) {
 
         TestCase testCase = TestCase.builder()
@@ -85,7 +85,7 @@ public class TestCaseController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> delete(@PathVariable Long id) {
+    public ApiResponse<Void> delete(@PathVariable("id") Long id) {
         testCaseService.delete(id);
         return ApiResponse.success(null, "Test case deleted successfully");
     }

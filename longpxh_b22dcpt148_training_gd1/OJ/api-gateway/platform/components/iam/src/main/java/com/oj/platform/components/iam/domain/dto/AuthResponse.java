@@ -13,4 +13,10 @@ public class AuthResponse {
     private OffsetDateTime accessTokenExpiredAt;
     private OffsetDateTime refreshTokenExpiredAt;
     private String tokenType;
+    
+    // User info
+    private Long userId;
+    private String username;
+    private String fullName;
+    private java.util.List<String> roles;
 }

@@ -36,7 +36,7 @@ public class ProblemService {
 
     @Transactional(readOnly = true)
     public Page<Problem> findByDifficulty(String difficulty, Pageable pageable) {
-        return problemRepository.findByDifficulty(difficulty, pageable)
+        return problemRepository.findByLevel(difficulty, pageable)
                 .map(this::toDomain);
     }
 
@@ -59,8 +59,8 @@ public class ProblemService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Problem> findByDifficultyAndClassIds(String difficulty, java.util.List<Long> classIds, Pageable pageable) {
-        return problemRepository.findByDifficultyAndClassIdIn(difficulty, classIds, pageable)
+    public Page<Problem> findByLevelAndClassIds(String difficulty, java.util.List<Long> classIds, Pageable pageable) {
+        return problemRepository.findByLevelAndClassIdIn(difficulty, classIds, pageable)
                 .map(this::toDomain);
     }
 
@@ -77,8 +77,8 @@ public class ProblemService {
                 .orElseThrow(() -> new RuntimeException("Problem not found with id: " + id));
 
         existing.setTitle(problem.getTitle());
-        existing.setDescription(problem.getDescription());
-        existing.setDifficulty(problem.getDifficulty());
+        existing.setContent(problem.getContent());
+        existing.setLevel(problem.getLevel());
         existing.setTimeLimit(problem.getTimeLimit());
         existing.setMemoryLimit(problem.getMemoryLimit());
 
@@ -97,9 +97,10 @@ public class ProblemService {
     private Problem toDomain(ProblemJpa jpa) {
         return Problem.builder()
                 .id(jpa.getId())
+                .problemCode(jpa.getProblemCode())
                 .title(jpa.getTitle())
-                .description(jpa.getDescription())
-                .difficulty(jpa.getDifficulty())
+                .content(jpa.getContent())
+                .level(jpa.getLevel())
                 .timeLimit(jpa.getTimeLimit())
                 .memoryLimit(jpa.getMemoryLimit())
                 .createdBy(jpa.getCreatedBy())
@@ -112,9 +113,10 @@ public class ProblemService {
     private ProblemJpa toJpa(Problem domain) {
         return ProblemJpa.builder()
                 .id(domain.getId())
+                .problemCode(domain.getProblemCode())
                 .title(domain.getTitle())
-                .description(domain.getDescription())
-                .difficulty(domain.getDifficulty())
+                .content(domain.getContent())
+                .level(domain.getLevel())
                 .timeLimit(domain.getTimeLimit())
                 .memoryLimit(domain.getMemoryLimit())
                 .createdBy(domain.getCreatedBy())

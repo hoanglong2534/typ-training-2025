@@ -1,5 +1,6 @@
 package com.oj.platform.components.iam.infrastructure.persistence.jpa.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,6 +22,10 @@ public class UserJpa {
     @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
+    @Column(name = "full_name", length = 255)
+    private String fullName;
+
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
