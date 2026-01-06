@@ -1,0 +1,68 @@
+
+services:
+
+  auth-db:
+    container_name: auth-db
+    image: 'postgres:15.15'
+    environment:
+      POSTGRES_USER: auth-user
+      POSTGRES_PASSWORD: auth@123
+      POSTGRES_DB: auth-db
+    volumes:
+      - 'auth-data:/var/lib/postgresql/data'
+    ports:
+      - '15433:5432'
+    networks:
+      - oj-cpp
+
+
+  discovery-service:
+    container_name: discovery-service
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile
+    image: discovery-service
+    ports:
+      - '18761:8761'
+    networks:
+      - oj-cpp
+
+
+  config-service:
+    container_name:  config-service
+    build:
+      context: ./config-service
+      dockerfile: Dockerfile
+    image: config-service
+    ports:
+      - '18888:8888'
+    depends_on:
+      - discovery-service
+    networks:
+      - oj-cpp
+
+  auth-service:
+    container_name: auth-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    image: auth-service
+    depends_on:
+      - auth-db
+      - discovery-service
+      - config-service
+    networks:
+      - oj-cpp
+
+
+networks:
+  oj-cpp:
+    driver: bridge
+
+volumes:
+  auth-data:
+
+
+
