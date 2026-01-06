@@ -13,7 +13,6 @@ public class ConfigServiceApplication {
 
 
         Dotenv dotenv = Dotenv.configure()
-                .directory("config-service")
                 .ignoreIfMissing()
                 .load();
         System.out.println("user.dir = " + System.getProperty("user.dir"));

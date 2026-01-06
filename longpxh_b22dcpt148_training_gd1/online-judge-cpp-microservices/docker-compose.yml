@@ -30,6 +30,9 @@ services:
 
   config-service:
     container_name:  config-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - GITLAB_TOKEN=${GITLAB_TOKEN}
     build:
       context: ./config-service
       dockerfile: Dockerfile
