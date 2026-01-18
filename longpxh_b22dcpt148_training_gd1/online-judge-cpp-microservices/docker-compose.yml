@@ -52,6 +52,8 @@ services:
       context: ./auth-service
       dockerfile: Dockerfile
     image: auth-service
+    ports:
+      - '18081:8081'
     depends_on:
       - auth-db
       - discovery-service
