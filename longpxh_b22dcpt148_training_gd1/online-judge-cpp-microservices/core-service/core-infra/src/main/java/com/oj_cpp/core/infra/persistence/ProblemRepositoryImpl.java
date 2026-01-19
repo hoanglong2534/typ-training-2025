@@ -2,6 +2,7 @@ package com.oj_cpp.core.infra.persistence;
 
 import com.oj_cpp.core.domain.model.Problem;
 import com.oj_cpp.core.domain.repository.ProblemRepository;
+import com.oj_cpp.core.infra.persistence.jpa.entity.ProblemJpa;
 import com.oj_cpp.core.infra.persistence.jpa.mapper.ProblemMapper;
 import com.oj_cpp.core.infra.persistence.jpa.repository.ProblemJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,8 @@ public class ProblemRepositoryImpl implements ProblemRepository {
 
     @Override
     public Problem save(Problem problem) {
-        var entity = problemMapper.toEntity(problem);
-        var saved = problemJpaRepository.save(entity);
+        ProblemJpa entity = problemMapper.toEntity(problem);
+        ProblemJpa saved = problemJpaRepository.save(entity);
         return problemMapper.toDomain(saved);
     }
 
