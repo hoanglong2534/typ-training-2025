@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: core-service
+  datasource:
+    url: jdbc:postgresql://postgres-core:5432/oj_core_db
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  cloud:
+    config:
+      enabled: false
+
+jwt:
+  secret: ${JWT_SECRET}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka/
