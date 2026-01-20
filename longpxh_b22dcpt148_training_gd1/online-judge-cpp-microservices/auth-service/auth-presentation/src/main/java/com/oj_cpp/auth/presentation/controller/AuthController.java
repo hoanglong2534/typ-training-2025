@@ -1,4 +1,4 @@
-package com.oj_cpp.auth.controller;
+package com.oj_cpp.auth.presentation.controller;
 
 import com.oj_cpp.auth.application.dto.request.LoginRequest;
 import com.oj_cpp.auth.application.dto.request.RegisterRequest;

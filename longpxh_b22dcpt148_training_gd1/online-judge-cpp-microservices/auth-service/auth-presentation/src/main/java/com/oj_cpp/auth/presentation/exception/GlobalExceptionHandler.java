@@ -1,4 +1,4 @@
-package com.oj_cpp.auth.exception;
+package com.oj_cpp.auth.presentation.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

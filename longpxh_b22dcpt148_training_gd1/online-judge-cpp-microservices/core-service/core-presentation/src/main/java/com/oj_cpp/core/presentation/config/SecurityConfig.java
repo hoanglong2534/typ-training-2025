@@ -1,4 +1,4 @@
-package com.oj_cpp.core.config;
+package com.oj_cpp.core.presentation.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

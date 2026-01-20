@@ -1,6 +1,5 @@
-package com.oj_cpp.core.config;
+package com.oj_cpp.core.presentation.config;
 
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.oj_cpp.core.controller;
+package com.oj_cpp.core.presentation.controller;
 
 import com.oj_cpp.core.application.dto.request.CreateTestCaseRequest;
 import com.oj_cpp.core.application.dto.response.TestCaseResponse;

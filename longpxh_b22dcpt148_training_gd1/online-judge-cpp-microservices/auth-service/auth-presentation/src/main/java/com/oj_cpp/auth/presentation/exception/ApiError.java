@@ -1,4 +1,4 @@
-package com.oj_cpp.auth.exception;
+package com.oj_cpp.auth.presentation.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
