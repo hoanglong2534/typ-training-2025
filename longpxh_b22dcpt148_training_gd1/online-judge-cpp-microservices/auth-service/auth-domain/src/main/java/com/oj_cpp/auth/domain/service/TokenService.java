@@ -5,4 +5,6 @@ import java.util.List;
 public interface TokenService {
     String generateToken(String username, List<String> roles);
     String generateRefreshToken(String username);
+    boolean validateToken(String token);
+    String getUsernameFromToken(String token);
 }

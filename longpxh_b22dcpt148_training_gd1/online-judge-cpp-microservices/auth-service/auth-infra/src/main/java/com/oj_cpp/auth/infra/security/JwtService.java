@@ -52,4 +52,21 @@ public class JwtService implements TokenService {
         
         return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     }
+
+    private final org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder;
+
+    @Override
+    public boolean validateToken(String token) {
+        try {
+            jwtDecoder.decode(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public String getUsernameFromToken(String token) {
+        return jwtDecoder.decode(token).getSubject();
+    }
 }

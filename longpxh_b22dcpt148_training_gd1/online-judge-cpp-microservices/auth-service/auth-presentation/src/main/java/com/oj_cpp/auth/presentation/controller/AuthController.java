@@ -31,4 +31,10 @@ public class AuthController {
         AuthResponse response = loginService.login(request);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody com.oj_cpp.auth.application.dto.request.RefreshTokenRequest request) {
+        AuthResponse response = loginService.refresh(request.getRefreshToken());
+        return ResponseEntity.ok(response);
+    }
 }

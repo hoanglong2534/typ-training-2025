@@ -30,6 +30,22 @@ public class LoginService {
             throw new RuntimeException("Invalid credentials");
         }
 
+        return generateTokens(user);
+    }
+
+    public AuthResponse refresh(String refreshToken) {
+        if (!tokenService.validateToken(refreshToken)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        String username = tokenService.getUsernameFromToken(refreshToken);
+        var user = userService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return generateTokens(user);
+    }
+
+    private AuthResponse generateTokens(com.oj_cpp.auth.domain.model.User user) {
         List<String> roles = roleService.findByUserId(user.getId())
                 .stream()
                 .map(Role::getName)
