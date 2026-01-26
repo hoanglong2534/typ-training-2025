@@ -3,8 +3,8 @@
 import { Box, Button, Card, CardContent, Container, TextField, Typography, Alert } from "@mui/material";
 import Link from "next/link";
 import { useState } from "react";
-import { api } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
+import { api } from "../../../lib/api";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
@@ -15,21 +15,19 @@ export default function LoginPage() {
     const handleLogin = async () => {
         try {
             setError('');
-            // Gọi API Login
-            // Lưu ý: Sửa lại đường dẫn '/auth/login' và cấu trúc body nếu backend của bạn khác
-            const data = await api('/auth/login', {
+
+            const data = await api('/api/auth/login', {
                 method: 'POST',
                 body: JSON.stringify({ username, password })
             });
 
-            // Backend trả về dạng { data: { accessToken: "...", refreshToken: "..." }, message: "..." }
-            // Nên cần chọc vào data.data
             const responseData = data.data || data;
             const accessToken = responseData.accessToken || responseData.token;
             const refreshToken = responseData.refreshToken;
 
             if (accessToken && refreshToken) {
                 login(accessToken, refreshToken);
+                window.location.href = '/';
             } else {
                 setError('Không tìm thấy token trong phản hồi');
             }

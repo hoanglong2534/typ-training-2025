@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/proxy';
 
 type RequestOptions = RequestInit & {
     headers?: Record<string, string>;

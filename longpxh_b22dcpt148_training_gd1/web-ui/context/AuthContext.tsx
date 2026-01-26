@@ -1,30 +1,17 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { api } from '@/lib/api';
+import { api } from '../lib/api';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 
-interface Role {
+export interface User {
     id: number;
-    name: string;
-    description: string;
-}
-
-interface UserRole {
-    id: number;
-    role: Role;
-}
-
-interface User {
-    id: string;
     username: string;
     email: string;
     fullName: string;
-    userRoles: UserRole[];
+    roles: string[];
 }
-
-
 
 interface AuthContextType {
     user: User | null;
@@ -55,11 +42,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
 
             try {
-                // Gọi API lấy thông tin user (Sửa đường dẫn này theo API thật của bạn)
-                // Gọi API lấy thông tin user (Sửa đường dẫn này theo API thật của bạn)
-                const response = await api<{ data: User }>('/users/my-info');
-                setUser(response.data);
+                // Using correct path /api/users/my-info
+                const userData = await api<User>('/api/users/my-info');
+                setUser(userData);
             } catch (error) {
+                console.error("Auth check failed:", error);
                 // Token lỗi hoặc hết hạn -> Xóa luôn
                 Cookies.remove('accessToken');
                 Cookies.remove('refreshToken');
@@ -75,8 +62,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = (accessToken: string, refreshToken: string) => {
         Cookies.set('accessToken', accessToken, { expires: 1 }); // 1 ngày
         Cookies.set('refreshToken', refreshToken, { expires: 7 }); // 7 ngày
-        // Sau khi set cookie, gọi lại checkAuth hoặc redirect luôn
-        // Ở đây mình reload nhẹ hoặc fetch lại user
+
+        // Reload to trigger checkAuth or redirect
         window.location.href = '/problems';
     };
 
