@@ -24,10 +24,10 @@ public class LoginService {
 
     public AuthResponse login(LoginRequest request) {
         var user = userService.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new com.oj_cpp.auth.application.exception.InvalidCredentialsException("Invalid credentials"));
 
         if (!passwordHasher.check(request.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new com.oj_cpp.auth.application.exception.InvalidCredentialsException("Invalid credentials");
         }
 
         return generateTokens(user);
@@ -51,7 +51,7 @@ public class LoginService {
                 .map(Role::getName)
                 .collect(Collectors.toList());
 
-        String accessToken = tokenService.generateToken(user.getUsername(), roles);
+        String accessToken = tokenService.generateToken(user.getUsername(), user.getId(), roles);
         String refreshToken = tokenService.generateRefreshToken(user.getUsername());
 
         return AuthResponse.builder()

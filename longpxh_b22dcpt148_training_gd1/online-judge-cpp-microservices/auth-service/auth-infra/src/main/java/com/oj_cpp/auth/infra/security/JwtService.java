@@ -20,7 +20,7 @@ public class JwtService implements TokenService {
     private final JwtEncoder jwtEncoder;
 
     @Override
-    public String generateToken(String username, List<String> roles) {
+    public String generateToken(String username, Long userId, List<String> roles) {
         Instant now = Instant.now();
         
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -28,6 +28,7 @@ public class JwtService implements TokenService {
                 .issuedAt(now)
                 .expiresAt(now.plus(15, ChronoUnit.MINUTES))
                 .subject(username)
+                .claim("userId", userId)
                 .claim("roles", roles)
                 .build();
 
