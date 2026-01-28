@@ -12,9 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateProblemRequest {
-    @NotBlank(message = "Problem code is required")
-    @Size(max = 50, message = "Problem code must not exceed 50 characters")
-    private String problemCode;
 
     @NotBlank(message = "Title is required")
     @Size(max = 200, message = "Title must not exceed 200 characters")

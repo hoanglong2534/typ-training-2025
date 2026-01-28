@@ -39,8 +39,8 @@ public class ProblemJpa {
     @Column(name = "memory_limit", nullable = false)
     private Integer memoryLimit;
 
-    @Column(name = "created_by")
-    private Long createdBy;
+    @Column(name = "created_by", length = 100)
+    private String createdBy;
 
     @Column(name = "class_id")
     private Long classId;

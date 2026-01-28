@@ -7,9 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
 @Repository
-public interface ProblemJpaRepository extends JpaRepository<ProblemJpa, Long> {
+public interface ProblemJpaRepository extends JpaRepository<ProblemJpa, Long>, JpaSpecificationExecutor<ProblemJpa> {
     Optional<ProblemJpa> findByProblemCode(String problemCode);
-    List<ProblemJpa> findByClassId(Long classId);
     boolean existsByProblemCode(String problemCode);
+    Optional<ProblemJpa> findTopByOrderByProblemCodeDesc();
 }

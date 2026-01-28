@@ -9,8 +9,8 @@ public interface ProblemRepository {
     Problem save(Problem problem);
     Optional<Problem> findById(Long id);
     Optional<Problem> findByProblemCode(String problemCode);
-    List<Problem> findAll();
-    List<Problem> findByClassId(Long classId);
     void deleteById(Long id);
+    Optional<Problem> findTopByOrderByProblemCodeDesc();
     boolean existsByProblemCode(String problemCode);
+    List<Problem> search(String keyword, String code, String title, String level, Long classId);
 }

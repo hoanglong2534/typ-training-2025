@@ -20,7 +20,7 @@ public class ProblemResponse {
     private ProblemLevelEnum level;
     private Integer timeLimit;
     private Integer memoryLimit;
-    private Long createdBy;
+    private String createdBy;
     private Long classId;
     private Instant createdAt;
     private Instant updatedAt;

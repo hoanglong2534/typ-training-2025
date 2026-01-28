@@ -11,6 +11,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -18,15 +21,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProblemController {
     private final ProblemService problemService;
+    private final com.oj_cpp.core.application.service.TestCaseService testCaseService;
 
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<ProblemResponse> createProblem(
-            @Valid @RequestBody CreateProblemRequest request,
+            @RequestPart(value = "data", required = false) @Valid CreateProblemRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             Authentication authentication) {
-        Long userId = extractUserId(authentication);
-        ProblemResponse response = problemService.createProblem(request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        
+        String username = extractUsername(authentication);
+        try {
+            InputStream fileStream = (file != null) ? file.getInputStream() : null;
+            ProblemResponse response = problemService.createOrImport(request, fileStream, username);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process request", e);
+        }
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ProblemResponse> getProblemById(@PathVariable Long id) {
@@ -34,21 +46,15 @@ public class ProblemController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/code/{problemCode}")
-    public ResponseEntity<ProblemResponse> getProblemByCode(@PathVariable String problemCode) {
-        ProblemResponse response = problemService.getProblemByCode(problemCode);
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping
-    public ResponseEntity<List<ProblemResponse>> getAllProblems() {
-        List<ProblemResponse> responses = problemService.getAllProblems();
-        return ResponseEntity.ok(responses);
-    }
-
-    @GetMapping("/class/{classId}")
-    public ResponseEntity<List<ProblemResponse>> getProblemsByClassId(@PathVariable Long classId) {
-        List<ProblemResponse> responses = problemService.getProblemsByClassId(classId);
+    public ResponseEntity<List<ProblemResponse>> getAllProblems(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) Long classId
+    ) {
+        List<ProblemResponse> responses = problemService.getAllProblems(keyword, code, title, level, classId);
         return ResponseEntity.ok(responses);
     }
 
@@ -58,10 +64,17 @@ public class ProblemController {
         return ResponseEntity.noContent().build();
     }
 
-    private Long extractUserId(Authentication authentication) {
+    @GetMapping("/{id}/test-cases")
+    public ResponseEntity<List<com.oj_cpp.core.application.dto.response.TestCaseResponse>> getTestCases(@PathVariable Long id) {
+        List<com.oj_cpp.core.application.dto.response.TestCaseResponse> testCases = 
+            testCaseService.getVisibleTestCasesByProblemId(id);
+        return ResponseEntity.ok(testCases);
+    }
+
+    private String extractUsername(Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            return Long.parseLong(jwt.getSubject());
+            return jwt.getSubject();
         }
-        throw new IllegalStateException("Unable to extract user ID from authentication");
+        throw new IllegalStateException("Unable to extract username from authentication");
     }
 }

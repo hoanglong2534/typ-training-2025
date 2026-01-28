@@ -2,9 +2,9 @@ spring:
   application:
     name: core-service
   datasource:
-    url: jdbc:postgresql://postgres-core:5432/oj_core_db
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://auth-db:5432/oj_core_db
+    username: auth-user
+    password: auth@123
   jpa:
     hibernate:
       ddl-auto: validate

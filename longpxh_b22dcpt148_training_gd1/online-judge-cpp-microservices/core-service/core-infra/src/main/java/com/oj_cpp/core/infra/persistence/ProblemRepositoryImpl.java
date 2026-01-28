@@ -37,19 +37,7 @@ public class ProblemRepositoryImpl implements ProblemRepository {
                 .map(problemMapper::toDomain);
     }
 
-    @Override
-    public List<Problem> findAll() {
-        return problemJpaRepository.findAll().stream()
-                .map(problemMapper::toDomain)
-                .collect(Collectors.toList());
-    }
 
-    @Override
-    public List<Problem> findByClassId(Long classId) {
-        return problemJpaRepository.findByClassId(classId).stream()
-                .map(problemMapper::toDomain)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public void deleteById(Long id) {
@@ -59,5 +47,50 @@ public class ProblemRepositoryImpl implements ProblemRepository {
     @Override
     public boolean existsByProblemCode(String problemCode) {
         return problemJpaRepository.existsByProblemCode(problemCode);
+    }
+
+    @Override
+    public Optional<Problem> findTopByOrderByProblemCodeDesc() {
+        return problemJpaRepository.findTopByOrderByProblemCodeDesc()
+                .map(problemMapper::toDomain);
+    }
+
+    @Override
+    public List<Problem> search(String keyword, String code, String title, String level, Long classId) {
+        org.springframework.data.jpa.domain.Specification<ProblemJpa> spec = org.springframework.data.jpa.domain.Specification.where(null);
+
+        if (code != null && !code.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.like(root.get("problemCode"), "%" + code + "%"));
+        }
+
+        if (title != null && !title.isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.like(root.get("title"), "%" + title + "%"));
+        }
+
+        if (keyword != null && !keyword.isEmpty()) {
+            String likePattern = "%" + keyword + "%";
+            spec = spec.and((root, query, cb) ->
+                    cb.or(
+                            cb.like(root.get("title"), likePattern),
+                            cb.like(root.get("problemCode"), likePattern)
+                    )
+            );
+        }
+
+        if (level != null && !level.isEmpty()) {
+            try {
+                com.oj_cpp.core.domain.enums.ProblemLevelEnum levelEnum = com.oj_cpp.core.domain.enums.ProblemLevelEnum.valueOf(level.toUpperCase());
+                spec = spec.and((root, query, cb) -> cb.equal(root.get("level"), levelEnum));
+            } catch (IllegalArgumentException e) {
+            }
+        }
+
+        if (classId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("classId"), classId));
+        }
+
+        return problemJpaRepository.findAll(spec).stream()
+                .map(problemMapper::toDomain)
+                .collect(Collectors.toList());
     }
 }
