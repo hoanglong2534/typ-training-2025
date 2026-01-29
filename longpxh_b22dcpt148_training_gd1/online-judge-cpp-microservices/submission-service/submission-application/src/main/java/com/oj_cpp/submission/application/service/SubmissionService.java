@@ -5,7 +5,9 @@ import com.oj_cpp.submission.application.dto.response.SubmissionResponse;
 import com.oj_cpp.submission.domain.enums.SubmissionStatusEnum;
 import com.oj_cpp.submission.domain.model.Submission;
 import com.oj_cpp.submission.domain.repository.SubmissionRepository;
+import com.oj_cpp.submission.domain.service.JudgeMessagePublisherPort;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,8 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SubmissionService {
     private final SubmissionRepository submissionRepository;
+    private final JudgeMessagePublisherPort judgeMessagePublisher;
 
     @Transactional
     public SubmissionResponse submit(SubmitCodeRequest request, Long userId) {
@@ -27,6 +31,21 @@ public class SubmissionService {
                 .build();
 
         Submission saved = submissionRepository.save(submission);
+        
+        // Publish to judge queue
+        try {
+            judgeMessagePublisher.publishJudgeRequest(
+                saved.getId(),
+                saved.getProblemId(),
+                saved.getCode(),
+                saved.getLanguage().name()
+            );
+            log.info("Submitted code for judging: submissionId={}", saved.getId());
+        } catch (Exception e) {
+            log.error("Failed to publish judge request for submissionId={}: {}", saved.getId(), e.getMessage());
+            // Don't fail the submission, the judge can be retried
+        }
+        
         return toResponse(saved);
     }
 

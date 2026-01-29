@@ -20,6 +20,11 @@ spring:
           default:
             connect-timeout: 5000
             read-timeout: 5000
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
 server:
   port: 8083

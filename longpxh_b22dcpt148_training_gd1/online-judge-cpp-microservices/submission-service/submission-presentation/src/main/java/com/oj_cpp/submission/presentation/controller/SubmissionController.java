@@ -46,7 +46,17 @@ public class SubmissionController {
 
     private Long extractUserId(Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            return Long.parseLong(jwt.getSubject());
+            Long userId = jwt.getClaim("userId");
+            if (userId != null) {
+                return userId;
+            }
+            // Fallback or error if claim is missing (e.g. old tokens)
+            // Ideally we should throw error, or try to parse subject if we were transitioning
+            try {
+                return Long.parseLong(jwt.getSubject());
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("Invalid user ID in token");
+            }
         }
         throw new IllegalStateException("Unable to extract user ID");
     }
