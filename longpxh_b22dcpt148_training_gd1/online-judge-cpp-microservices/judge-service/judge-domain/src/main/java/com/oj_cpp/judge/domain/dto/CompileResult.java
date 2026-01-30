@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class CompileResult {
     private Boolean success;
     private String message;
+    private String executablePath;
 }
