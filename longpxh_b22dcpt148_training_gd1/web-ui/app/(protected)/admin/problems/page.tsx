@@ -10,6 +10,7 @@ import {
     DialogContentText,
     DialogTitle, Snackbar, SnackbarCloseReason, TextareaAutosize, TextField,
 } from "@mui/material";
+import { api } from "@/lib/api";
 import Title from "@/components/title/Title";
 import { ProblemFilter } from "@/components/filter/ProblemFilter";
 import Table, { Column } from "@/components/table/Table";
@@ -28,39 +29,16 @@ const columns: Column[] = [
     { label: "Trạng thái", key: ["status"] }
 ];
 
-const datas = [
-    {
-        id: 1,
-        data: {
-            code: "P001",
-            title: "Two Sum",
-            level: "Dễ",
-            status: "Chưa làm"
-
-        }
-
-    },
-    {
-        id: 2,
-        data: {
-            code: "P002",
-            title: "Two Sum 2",
-            level: "Khó",
-            status: "Chưa làm"
-
-        }
-    }
-];
 
 interface ProblemFilter {
     code: string,
-    name: string,
+    title: string,
     level: string
 }
 
 const ProblemFilterDefault = {
     code: '',
-    name: '',
+    title: '',
     level: ''
 }
 
@@ -79,31 +57,57 @@ const primary = {
 
 const ProblemSelect = [
     {
-        value: "1",
+        value: "EASY",
         label: "Dễ"
     }, {
-        value: "2",
+        value: "MEDIUM",
         label: "Trung bình"
     }, {
-        value: "3",
+        value: "HARD",
         label: "Khó"
     },
 ]
 
 export default function AdminProblems() {
 
+    const [rows, setRows] = useState<any[]>([]);
     const [open, setOpen] = React.useState(false);
     const [openSnack, setOpenSnack] = React.useState(false)
     const [filterState, setFilterState] = useState<ProblemFilter>(ProblemFilterDefault);
     const [showError, setShowError] = React.useState(false);
     const [value, setValue] = useState<File | null>(null);
 
+    const fetchProblems = async () => {
+        try {
+            const queryParams = new URLSearchParams();
+            if (filterState.code) queryParams.append('code', filterState.code);
+            if (filterState.title) queryParams.append('title', filterState.title);
+            if (filterState.level) queryParams.append('level', filterState.level);
 
-    // Refs for form fields
+            const response: any = await api(`/api/problems?${queryParams.toString()}`);
+
+
+            const formattedRows = response.map((p: any) => ({
+                id: p.id,
+                data: {
+                    code: p.problemCode,
+                    title: p.title,
+                    level: p.level,
+                    status: "Hoạt động"
+                }
+            }));
+            setRows(formattedRows);
+        } catch (error) {
+            console.error("Failed to fetch problems", error);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchProblems();
+    }, [filterState]);
+
+
     const titleRef = React.useRef<HTMLInputElement>(null);
-    const descriptionRef = React.useRef<HTMLTextAreaElement>(null);
-    const timeLimitRef = React.useRef<HTMLInputElement>(null);
-    const memoryLimitRef = React.useRef<HTMLInputElement>(null);
 
     const handleClickOpen = () => {
         setShowError(false);
@@ -115,23 +119,42 @@ export default function AdminProblems() {
         setShowError(false);
     };
 
-    const handleAdd = () => {
-        // Validate all fields
+    const handleAdd = async () => {
         const title = titleRef.current?.value || '';
-        const description = descriptionRef.current?.value || '';
-        const timeLimit = timeLimitRef.current?.value || '';
-        const memoryLimit = memoryLimitRef.current?.value || '';
         const level = filterState.level;
         const file = value;
 
-        if (!title.trim() || !description.trim() || !level || !timeLimit || !memoryLimit || !file) {
+        if (!title.trim() || !level || !file) {
             setShowError(true);
             return;
         }
 
-        setShowError(false);
-        setOpenSnack(true)
-        handleClose()
+        try {
+            const formData = new FormData();
+            const problemData = {
+                title,
+                content: "From Zip",
+                level,
+                timeLimit: 1,
+                memoryLimit: 1,
+                classId: null
+            };
+            formData.append("data", new Blob([JSON.stringify(problemData)], { type: "application/json" }));
+            formData.append("file", file);
+
+            await api('/api/problems', {
+                method: 'POST',
+                body: formData
+            });
+
+            setShowError(false);
+            setOpenSnack(true);
+            await fetchProblems(); // Refresh list
+            handleClose();
+        } catch (error: any) {
+            console.error(error);
+            alert("Thêm bài tập thất bại: " + error.message);
+        }
     }
 
     const handleCloseSnack = (
@@ -157,11 +180,11 @@ export default function AdminProblems() {
     const handleChange = (file: File | null) => {
         if (!file) return;
 
-        const allowed = ["txt"]; // danh sách đuôi hợp lệ
+        const allowed = ["zip"];
         const ext = file.name.split(".").pop()?.toLowerCase();
 
         if (!ext || !allowed.includes(ext)) {
-            alert("Chỉ cho phép file .txt");
+            alert("Chỉ cho phép file .zip chứa testcase");
             setValue(null);
             return;
         }
@@ -180,7 +203,7 @@ export default function AdminProblems() {
             <ProblemFilter />
             <Table
                 columns={columns}
-                rows={datas}
+                rows={rows}
             />
 
             <Dialog
@@ -198,29 +221,19 @@ export default function AdminProblems() {
                     )}
                     <DialogContentText id="alert-dialog-description">
                         <TextField label="Tên bài" fullWidth className="!mb-3" inputRef={titleRef} />
-                        <TextareaAutosize
-                            aria-label="empty textarea"
-                            placeholder="Nhập đề bài"
-                            minRows={3}
-                            maxRows={50}
-                            ref={descriptionRef}
-                            className="!mb-3 w-full p-2.5 text-base rounded-md border border-gray-300 resize-y box-border"
-                        />
+
                         <Select
                             value={filterState.level}
                             label="Chọn độ khó"
                             options={ProblemSelect}
                             onChange={(value) => handleChangeTextField(value, 'level')} />
-                        <TextField label="Thời gian (giây)" type="number" fullWidth className="!my-3" inputRef={timeLimitRef} />
-                        <TextField label="Bộ nhớ (MB)" type="number" fullWidth className="!mb-3" inputRef={memoryLimitRef} />
-                        <MuiFileInput fullWidth label="Tải file testcase (chỉ hỗ trợ dạng .txt)"
+
+                        <MuiFileInput fullWidth label="Tải file testcase (.zip chứa .xml/.in/.out)"
                             value={value}
                             inputProps={{
-                                accept: ".txt"
+                                accept: ".zip"
                             }}
                             onChange={handleChange} />
-
-
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -241,6 +254,6 @@ export default function AdminProblems() {
                     Thêm bài tập thành công!
                 </Alert>
             </Snackbar>
-        </Container>
+        </Container >
     )
 }

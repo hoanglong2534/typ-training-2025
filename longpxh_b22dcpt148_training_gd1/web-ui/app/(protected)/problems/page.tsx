@@ -1,12 +1,14 @@
 "use client";
 
 
-import Table, {Column} from "@/components/table/Table";
+import Table, { Column } from "@/components/table/Table";
 import { Container } from "@mui/material";
 import Title from "@/components/title/Title";
 import { ProblemFilter as ProblemFilter } from "@/components/filter/ProblemFilter";
 import { useRouter } from "next/navigation";
-import {Property} from "csstype";
+import { Property } from "csstype";
+import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
 import Columns = Property.Columns;
 
 
@@ -17,33 +19,32 @@ const columns: Column[] = [
     { label: "Trạng thái", key: ["status"] }
 ];
 
-const datas = [
-    {
-        id: 1,
-        data:{
-            code: "P001",
-            title: "Two Sum",
-            level: "Dễ",
-            status: "Chưa làm"
-
-        }
-
-    },
-    {
-        id: 2,
-        data:{
-            code: "P002",
-            title: "Two Sum 2",
-            level: "Khó",
-            status: "Chưa làm"
-
-        }
-    }
-];
 
 export default function Problems() {
 
-    const router = useRouter()
+    const router = useRouter();
+    const [rows, setRows] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchProblems = async () => {
+            try {
+                const response: any = await api('/api/problems');
+                const formattedRows = response.map((p: any) => ({
+                    id: p.id,
+                    data: {
+                        code: p.problemCode,
+                        title: p.title,
+                        level: p.level,
+                        status: "Chưa làm"
+                    }
+                }));
+                setRows(formattedRows);
+            } catch (error) {
+                console.error("Failed to fetch problems", error);
+            }
+        };
+        fetchProblems();
+    }, []);
 
     return (
         <Container>
@@ -51,8 +52,8 @@ export default function Problems() {
             <ProblemFilter />
             <Table
                 columns={columns}
-                rows={datas}
-                onClick={(id:number) => router.push(`problems/${id}`)}
+                rows={rows}
+                onClick={(id: number) => router.push(`problems/${id}`)}
             />
 
         </Container>

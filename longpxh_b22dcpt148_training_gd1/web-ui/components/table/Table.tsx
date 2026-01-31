@@ -11,17 +11,12 @@ import Paper from '@mui/material/Paper';
 
 interface Row {
     id: number | null,
-    data: {
-        code: string,
-        title: string,
-        level: string,
-        status: string
-    }
+    data: Record<string, any>
 }
 
 export interface Column {
     label: string,
-    key: (keyof Row["data"])[]
+    key: string[]
 }
 
 interface TableProgs {

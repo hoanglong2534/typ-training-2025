@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/proxy';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 type RequestOptions = RequestInit & {
     headers?: Record<string, string>;
@@ -27,8 +27,9 @@ export const api = async <T = any>(path: string, options: RequestOptions = {}): 
     let token = Cookies.get('accessToken');
 
     // 2. Chuẩn bị Header
+    // 2. Chuẩn bị Header
     const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...(options.headers as Record<string, string>),
     };
 
