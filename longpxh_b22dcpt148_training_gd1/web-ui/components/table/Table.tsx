@@ -16,7 +16,8 @@ interface Row {
 
 export interface Column {
     label: string,
-    key: string[]
+    key: string[],
+    render?: (value: any, row: any) => React.ReactNode
 }
 
 interface TableProgs {
@@ -59,13 +60,10 @@ function Table({ columns, rows, onClick }: TableProgs) {
                                 >
                                     {
                                         columns.map((col, indexCol) => {
+                                            const cellValue = col.key.map((i) => item.data[i]).join("");
                                             return (
                                                 <TableCell align="center" key={indexCol} sx={{ textAlign: "center" }}>
-                                                    {
-                                                        col.key.map((i) =>
-                                                            item.data[i]
-                                                        )
-                                                    }
+                                                    {col.render ? col.render(cellValue, item) : cellValue}
                                                 </TableCell>
                                             );
                                         })

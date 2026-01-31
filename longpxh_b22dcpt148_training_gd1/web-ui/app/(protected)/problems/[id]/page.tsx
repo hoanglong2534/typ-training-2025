@@ -1,7 +1,9 @@
 "use client";
 
 import Title from "@/components/title/Title";
-import { Alert, Button, Card, CircularProgress, Container, Snackbar, TextareaAutosize, Typography } from "@mui/material";
+import { Alert, Button, Card, CircularProgress, Container, Snackbar, TextareaAutosize, Typography, Dialog, DialogTitle, DialogContent, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Grid } from "@mui/system";
 import BreadCumb from "@/components/breadcumb/BreadCumb";
 import { useParams, useRouter } from "next/navigation";
@@ -25,6 +27,7 @@ interface Submission {
     judgeResult: string | null;
     executionTime: number | null;
     submittedAt: string;
+    code: string;
 }
 
 export default function ProblemDetail() {
@@ -44,6 +47,8 @@ export default function ProblemDetail() {
         message: '',
         severity: 'success'
     });
+    const [viewCode, setViewCode] = useState<string | null>(null);
+    const [openModal, setOpenModal] = useState(false);
 
     // Breadcrumb config
     const inherit = [
@@ -98,25 +103,57 @@ export default function ProblemDetail() {
     }, [id]);
 
     // Fetch user submissions for this problem
+    const fetchSubmissions = async () => {
+        try {
+            const data = await api<any>(`/api/submissions?problemId=${id}`);
+            const formattedSubmissions = (data.content || data || []).map((s: Submission) => ({
+                id: s.id,
+                data: {
+                    createdAt: new Date(s.submittedAt).toLocaleString('vi-VN'),
+                    result: s.judgeResult || s.status,
+                    code: s.code,
+                    originalStatus: s.status, // Keep original status for logic
+                    originalResult: s.judgeResult // Keep original result for logic
+                }
+            }));
+            setSubmissions(formattedSubmissions);
+            return formattedSubmissions;
+        } catch (error) {
+            console.error("Failed to fetch submissions:", error);
+            return [];
+        }
+    };
+
     useEffect(() => {
-        const fetchSubmissions = async () => {
-            try {
-                const data = await api<any>(`/api/submissions?problemId=${id}`);
-                const formattedSubmissions = (data.content || data || []).map((s: Submission) => ({
-                    id: s.id,
-                    data: {
-                        createdAt: new Date(s.submittedAt).toLocaleString('vi-VN'),
-                        result: s.judgeResult || s.status
-                    }
-                }));
-                setSubmissions(formattedSubmissions);
-            } catch (error) {
-                console.error("Failed to fetch submissions:", error);
+        fetchSubmissions();
+    }, [id]);
+
+    // Polling for pending submissions
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+
+        const checkPending = async () => {
+            const hasPending = submissions.some(s =>
+                ['PENDING', 'JUDGING', 'QUEUED'].includes(s.data.originalResult) ||
+                ['PENDING', 'JUDGING', 'QUEUED'].includes(s.data.originalStatus)
+            );
+
+            if (hasPending) {
+                await fetchSubmissions();
             }
         };
 
-        fetchSubmissions();
-    }, [id]);
+        if (submissions.some(s =>
+            ['PENDING', 'JUDGING', 'QUEUED'].includes(s.data.originalResult) ||
+            ['PENDING', 'JUDGING', 'QUEUED'].includes(s.data.originalStatus)
+        )) {
+            intervalId = setInterval(checkPending, 2000);
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [submissions, id]);
 
     // Handle submit code
     const handleSubmit = async () => {
@@ -144,7 +181,8 @@ export default function ProblemDetail() {
                 id: s.id,
                 data: {
                     createdAt: new Date(s.submittedAt).toLocaleString('vi-VN'),
-                    result: s.judgeResult || s.status
+                    result: s.judgeResult || s.status,
+                    code: s.code
                 }
             }));
             setSubmissions(formattedSubmissions);
@@ -167,7 +205,52 @@ export default function ProblemDetail() {
 
     const columnKq: Column[] = [
         { label: "Thời gian nộp", key: ["createdAt"] },
-        { label: "Kết quả", key: ["result"] }
+        {
+            label: "Kết quả",
+            key: ["result"],
+            render: (value: string, row: any) => {
+                const isPending = ['PENDING', 'JUDGING', 'QUEUED'].includes(row.data.originalResult) ||
+                    ['PENDING', 'JUDGING', 'QUEUED'].includes(row.data.originalStatus) ||
+                    value === 'PENDING' || value === 'JUDGING' || value === 'QUEUED';
+
+                if (isPending) {
+                    return (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <CircularProgress size={16} />
+                            <span>{value || "Đang chấm..."}</span>
+                        </div>
+                    );
+                }
+
+                let color = '#757575'; // default
+                if (value === 'ACCEPTED' || value === 'AC') color = '#2e7d32'; // green
+                else if (value === 'WRONG_ANSWER' || value === 'WA') color = '#d32f2f'; // red
+                else if (value === 'COMPILATION_ERROR' || value === 'CE') color = '#ed6c02'; // orange
+                else if (value === 'TIME_LIMIT_EXCEEDED' || value === 'TLE') color = '#ef5350'; // light red
+                else if (value === 'RUNTIME_ERROR' || value === 'RTE' || value === 'RE') color = '#ff9800'; // dark orange
+                else if (value === 'MEMORY_LIMIT_EXCEEDED' || value === 'MLE') color = '#9c27b0'; // purple
+
+                return (
+                    <span style={{ color: color, fontWeight: 600 }}>
+                        {value}
+                    </span>
+                );
+            }
+        },
+        {
+            label: "Thao tác", key: ["action"], render: (_: any, row: any) => (
+                <IconButton
+                    size="small"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setViewCode(row.data.code);
+                        setOpenModal(true);
+                    }}
+                >
+                    <VisibilityIcon fontSize="small" />
+                </IconButton>
+            )
+        }
     ];
 
     // Mock example data (TODO: get from API)
@@ -276,6 +359,26 @@ export default function ProblemDetail() {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
+
+            <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="md" fullWidth>
+                <DialogTitle sx={{ m: 0, p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    Chi tiết bài nộp
+                    <IconButton
+                        aria-label="close"
+                        onClick={() => setOpenModal(false)}
+                        sx={{
+                            color: (theme) => theme.palette.grey[500],
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent dividers>
+                    <Typography component="pre" sx={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+                        {viewCode || "Không có nội dung code"}
+                    </Typography>
+                </DialogContent>
+            </Dialog>
         </Container>
     );
 }

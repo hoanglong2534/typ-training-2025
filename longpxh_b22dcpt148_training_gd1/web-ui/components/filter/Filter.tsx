@@ -5,15 +5,25 @@ import { ReactNode } from "react";
 import { Grid } from "@mui/system";
 
 interface FilterProgs {
-    children: ReactNode
+    children: ReactNode;
+    onSearch?: () => void;
 }
 
-export default function Filter({ children }: FilterProgs) {
+export default function Filter({ children, onSearch }: FilterProgs) {
 
     return (
         <Grid container gap={3} className="!my-4" alignItems="flex-end">
             {children}
-            <Grid size={{ xs: 12, md: 12, xl: 3 }}><Button variant="outlined" className="h-10" fullWidth>Tìm kiếm</Button></Grid>
+            <Grid size={{ xs: 12, md: 12, xl: 3 }}>
+                <Button
+                    variant="outlined"
+                    className="h-10"
+                    fullWidth
+                    onClick={onSearch}
+                >
+                    Tìm kiếm
+                </Button>
+            </Grid>
         </Grid>
     )
 }

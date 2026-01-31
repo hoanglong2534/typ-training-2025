@@ -6,7 +6,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import SelectMui, { SelectChangeEvent } from '@mui/material/Select';
 import SearchIcon from '@mui/icons-material/Search';
-import {IconButton, ListSubheader, TextField} from "@mui/material";
+import { IconButton, ListSubheader, TextField } from "@mui/material";
 
 interface Option {
     value: string,
@@ -20,15 +20,16 @@ interface SelectProgs {
     onChange: (value: string) => void
 }
 
-export default function Select({ options, value, label, onChange}: SelectProgs) {
+export default function Select({ options, value, label, onChange }: SelectProgs) {
 
     return (
 
-        <FormControl fullWidth size="small">
+        <FormControl fullWidth size="small" sx={{ minWidth: 200 }}>
             <InputLabel id="demo-simple-select-label" size="small">{label}</InputLabel>
             <SelectMui
                 fullWidth
                 size="small"
+                sx={{ minWidth: 200 }}
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 value={value}
@@ -44,9 +45,9 @@ export default function Select({ options, value, label, onChange}: SelectProgs) 
                         size="small"
                         fullWidth
                         InputProps={{
-                            endAdornment:(
+                            endAdornment: (
                                 <IconButton size="small">
-                                    <SearchIcon/>
+                                    <SearchIcon />
                                 </IconButton>
                             )
                         }}
@@ -58,7 +59,7 @@ export default function Select({ options, value, label, onChange}: SelectProgs) 
                 {
                     options.map((item, index) => {
                         return (
-                            <MenuItem key={index}  value={item.value}>{item.label}</MenuItem>
+                            <MenuItem key={index} value={item.value}>{item.label}</MenuItem>
 
                         );
                     })
